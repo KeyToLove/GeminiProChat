@@ -1,11 +1,26 @@
-import { GoogleGenerativeAI } from '@fuyun/generative-ai'
+import { GoogleGenerativeAI,HarmCategory,HarmBlockThreshold } from '@fuyun/generative-ai'
 
 const apiKey = (import.meta.env.GEMINI_API_KEY)
 const apiBaseUrl = (import.meta.env.API_BASE_URL)?.trim().replace(/\/$/, '')
 
 const genAI = apiBaseUrl
-  ? new GoogleGenerativeAI(apiKey, apiBaseUrl)
+  ? new GoogleGenerativeAI(apiKey, apiBaseUrl,)
   : new GoogleGenerativeAI(apiKey)
+
+  const safetySettings = [
+    {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+];
 
 export const startChatAndSendMessageStream = async(history: ChatMessage[], newMessage: string) => {
   const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
@@ -18,6 +33,7 @@ export const startChatAndSendMessageStream = async(history: ChatMessage[], newMe
     generationConfig: {
       maxOutputTokens: 8000,
     },
+    safetySettings,
   })
 
   // Use sendMessageStream for streaming responses
